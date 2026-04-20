@@ -32,3 +32,28 @@ teardown() {
   log_warn "test-mod" "careful"
   grep -q "\[WARN" "$VIBE_LOG_FILE"
 }
+
+@test "check_installed returns 0 when command exists" {
+  run check_installed "bash"
+  [[ "$status" -eq 0 ]]
+}
+
+@test "check_installed returns 1 when command is missing" {
+  run check_installed "definitely_not_a_command_xyzzy"
+  [[ "$status" -eq 1 ]]
+}
+
+@test "brew_install is a no-op when formula already installed" {
+  # Mock: pretend `brew list` says 'jq' exists
+  brew() {
+    if [[ "$1" == "list" && "$2" == "--formula" && "$3" == "jq" ]]; then
+      return 0
+    fi
+    echo "brew called with unexpected args: $*" >&2
+    return 99
+  }
+  export -f brew
+  run brew_install "jq"
+  [[ "$status" -eq 0 ]]
+  grep -q "jq: already installed" "$VIBE_LOG_FILE"
+}

@@ -32,3 +32,41 @@ log_fail() {
   printf "${C_RED}  ✗ %s${C_RESET}\n" "${*:2}" >&2
   return 1
 }
+
+# -- Idempotency helpers -------------------------------------------------------
+
+check_installed() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+brew_install() {
+  local formula="$1"
+  local module="${2:-core}"
+  if brew list --formula "$formula" >/dev/null 2>&1; then
+    log_info "$module" "$formula: already installed"
+    return 0
+  fi
+  log_info "$module" "$formula: installing…"
+  if brew install "$formula" >>"$VIBE_LOG_FILE" 2>&1; then
+    log_ok "$module" "$formula: installed"
+  else
+    log_fail "$module" "$formula: install failed (see log)"
+    return 1
+  fi
+}
+
+brew_cask_install() {
+  local cask="$1"
+  local module="${2:-core}"
+  if brew list --cask "$cask" >/dev/null 2>&1; then
+    log_info "$module" "$cask (cask): already installed"
+    return 0
+  fi
+  log_info "$module" "$cask (cask): installing…"
+  if brew install --cask "$cask" >>"$VIBE_LOG_FILE" 2>&1; then
+    log_ok "$module" "$cask (cask): installed"
+  else
+    log_fail "$module" "$cask (cask): install failed (see log)"
+    return 1
+  fi
+}
