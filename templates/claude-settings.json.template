@@ -1,0 +1,45 @@
+{
+  "env": {
+    "CLAUDE_CODE_USE_VERTEX": "1",
+    "ANTHROPIC_VERTEX_PROJECT_ID": "{{VERTEX_PROJECT}}",
+    "CLOUD_ML_REGION": "{{VERTEX_REGION}}",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "*",
+      "Read", "Grep", "Glob", "LS",
+      "Bash", "WebFetch", "WebSearch",
+      "Edit", "Write", "NotebookEdit",
+      "TodoWrite", "Task",
+      "mcp__*"
+    ]
+  },
+  "model": "opus[1m]",
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true,
+    "cloudflare@claude-plugins-official": true,
+    "mempalace@mempalace": true,
+    "fullstack-dev-skills@fullstack-dev-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": { "source": { "source": "github", "repo": "anthropics/claude-plugins-official" } },
+    "mempalace":               { "source": { "source": "github", "repo": "milla-jovovich/mempalace" } },
+    "fullstack-dev-skills":    { "source": { "source": "github", "repo": "jeffallan/claude-skills" } }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "type": "command",
+    "command": "bash {{HOME}}/.claude/statusline.sh"
+  }
+}
