@@ -71,6 +71,10 @@ doctor_run() {
   # shellcheck disable=SC2088
   _check "~/.claude.json teammateMode" \
     "jq -e '.teammateMode == \"tmux\"' $HOME/.claude.json"
+  _check "mempalace venv" \
+    "test -x $HOME/.local/share/mempalace/venv/bin/python3 && $HOME/.local/share/mempalace/venv/bin/python3 -c 'import mempalace'"
+  _check "mempalace MCP" \
+    "claude mcp list 2>/dev/null | grep -q '^mempalace:.*Connected'"
 
   # Runtimes
   _check "Node.js (via nvm)"      "test -s $HOME/.nvm/nvm.sh"

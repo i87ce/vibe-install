@@ -99,6 +99,51 @@ enable_agent_teams() {
     || { log_fail "$MOD" "patch ~/.claude.json failed"; rm -f "$tmp"; return 1; }
 }
 
+# Mempalace MCP requires a dedicated venv because Homebrew Python's pyexpat is
+# broken on recent macOS (libexpat symbol mismatch). uv downloads a standalone
+# CPython that carries its own libexpat, side-stepping the issue entirely.
+MEMPALACE_VENV="$HOME/.local/share/mempalace/venv"
+
+install_mempalace_mcp() {
+  if ! check_installed uv; then
+    log_warn "$MOD" "mempalace: uv not found — skipping (enable rt_python)"
+    return 0
+  fi
+  if ! check_installed claude; then
+    log_warn "$MOD" "mempalace: claude CLI not found — skipping"
+    return 0
+  fi
+
+  if [[ -x "$MEMPALACE_VENV/bin/python3" ]] \
+     && "$MEMPALACE_VENV/bin/python3" -c "import mempalace" 2>/dev/null; then
+    log_info "$MOD" "mempalace venv: already set up"
+  else
+    log_info "$MOD" "mempalace: creating dedicated venv…"
+    mkdir -p "$(dirname "$MEMPALACE_VENV")"
+    uv venv "$MEMPALACE_VENV" --python 3.13 >>"$VIBE_LOG_FILE" 2>&1 \
+      || { log_fail "$MOD" "mempalace: venv creation failed"; return 1; }
+    # shellcheck disable=SC1091
+    source "$MEMPALACE_VENV/bin/activate"
+    uv pip install mempalace >>"$VIBE_LOG_FILE" 2>&1 \
+      || { log_fail "$MOD" "mempalace: pip install failed"; return 1; }
+    deactivate 2>/dev/null || true
+    log_ok "$MOD" "mempalace: venv ready at $MEMPALACE_VENV"
+  fi
+
+  local current_cmd
+  current_cmd="$(claude mcp list 2>/dev/null | grep '^mempalace:' || true)"
+  local expected="$MEMPALACE_VENV/bin/python3 -m mempalace.mcp_server"
+  if [[ "$current_cmd" == *"$expected"* ]]; then
+    log_info "$MOD" "mempalace MCP: already registered with venv python"
+    return 0
+  fi
+  claude mcp remove mempalace >>"$VIBE_LOG_FILE" 2>&1 || true
+  claude mcp add mempalace -- "$MEMPALACE_VENV/bin/python3" -m mempalace.mcp_server \
+    >>"$VIBE_LOG_FILE" 2>&1 \
+    || { log_fail "$MOD" "mempalace: MCP registration failed"; return 1; }
+  log_ok "$MOD" "mempalace MCP: registered ($expected)"
+}
+
 run_claude() {
   local MOD="05-claude"
   local selected="$VIBE_SELECTED"
@@ -110,6 +155,7 @@ run_claude() {
   # Plugins + marketplaces are written inside the settings template, so claude_marketplaces
   # and claude_plugins are effectively satisfied by claude_settings. We keep them as flags
   # so doctor can verify, but no separate install step needed.
+  [[ " $selected " == *" claude_plugins "* ]]      && install_mempalace_mcp
   [[ " $selected " == *" claude_statusline "* ]]   && install_statusline
   [[ " $selected " == *" claude_teams "* ]]        && enable_agent_teams
   [[ " $selected " == *" claude_vertex "* ]]       && vertex_login
