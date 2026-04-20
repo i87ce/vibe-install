@@ -85,10 +85,17 @@ brew_cask_install() {
   log_info "$module" "$cask (cask): installing…"
   if brew install --cask "$cask" >>"$VIBE_LOG_FILE" 2>&1; then
     log_ok "$module" "$cask (cask): installed"
-  else
-    log_fail "$module" "$cask (cask): install failed (see log)"
-    return 1
+    return 0
   fi
+  # Install failed — common cause: app already installed manually (not brew-managed).
+  # Detect from brew's recent log output and downgrade to warn with an adopt hint.
+  if tail -n 80 "$VIBE_LOG_FILE" 2>/dev/null \
+       | grep -qE "already (exists|installed)|It seems there is already|would be overwritten"; then
+    log_warn "$module" "$cask (cask): app already present but not brew-managed — skipping (run 'brew install --cask $cask --adopt' to take ownership)"
+    return 0
+  fi
+  log_fail "$module" "$cask (cask): install failed (see log)"
+  return 1
 }
 
 # -- Template rendering --------------------------------------------------------
