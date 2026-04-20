@@ -68,10 +68,39 @@ if [[ "$MODE" != "doctor" ]]; then
   run_iterm2 || log_warn "main" "iTerm2 setup had failures — continuing"
 fi
 
-# -- Dispatch placeholder (filled in later tasks) ------------------------------
+# -- Dispatch ------------------------------------------------------------------
+
+# shellcheck source=lib/tui.sh
+source "$SCRIPT_DIR/lib/tui.sh"
 
 case "$MODE" in
-  doctor)      echo "(doctor not yet implemented)"; exit 0 ;;
-  dry-run)     echo "(dry-run not yet implemented)"; exit 0 ;;
-  interactive|config|only) echo "(main flow not yet implemented)"; exit 0 ;;
+  doctor)
+    echo "(doctor runs after module block — call doctor_run)"; exit 0
+    ;;
+  config)
+    VIBE_SELECTED="$(tui_load_config "$CONFIG_FILE")"
+    # Non-interactive: use defaults for sub-prompts unless env vars already set
+    : "${VIBE_PROMPT:=p10k}"
+    : "${VIBE_VERTEX_PROJECT:=ea-claw}"
+    : "${VIBE_VERTEX_REGION:=europe-west1}"
+    : "${VIBE_OBSIDIAN_VAULT:=}"
+    export VIBE_SELECTED VIBE_PROMPT VIBE_VERTEX_PROJECT VIBE_VERTEX_REGION VIBE_OBSIDIAN_VAULT
+    ;;
+  only)
+    VIBE_SELECTED="$(echo "$ONLY_MODULES" | tr ',' ' ')"
+    : "${VIBE_PROMPT:=p10k}"
+    : "${VIBE_VERTEX_PROJECT:=ea-claw}"
+    : "${VIBE_VERTEX_REGION:=europe-west1}"
+    : "${VIBE_OBSIDIAN_VAULT:=}"
+    export VIBE_SELECTED VIBE_PROMPT VIBE_VERTEX_PROJECT VIBE_VERTEX_REGION VIBE_OBSIDIAN_VAULT
+    ;;
+  dry-run|interactive)
+    tui_run || { log_fail "main" "TUI cancelled"; exit 1; }
+    ;;
 esac
+
+log_info "main" "Selected: $VIBE_SELECTED"
+log_info "main" "Prompt=$VIBE_PROMPT vertex=$VIBE_VERTEX_PROJECT/$VIBE_VERTEX_REGION vault=${VIBE_OBSIDIAN_VAULT:-none}"
+
+# Module dispatch (populated in subsequent phases)
+echo "(module execution not yet implemented)"
