@@ -123,3 +123,39 @@ tui_load_config() {
   done < "$in_file"
   printf '%s' "${out% }"
 }
+
+# tui_prompt_engine — radiolist between p10k and starship. Prints key.
+tui_prompt_engine() {
+  local tmp; tmp="$(mktemp)"
+  dialog --backtitle "vibe-install" --title "Prompt engine" \
+    --radiolist "Choose your zsh prompt:" 12 60 2 \
+    p10k "Powerlevel10k (preconfigured)" on \
+    starship "Starship" off 2>"$tmp"
+  local choice; choice="$(cat "$tmp")"; rm -f "$tmp"
+  printf '%s' "${choice:-p10k}"
+}
+
+# tui_ask_vertex — prints "PROJECT REGION"
+tui_ask_vertex() {
+  local tmp; tmp="$(mktemp)"
+  dialog --backtitle "vibe-install" --title "Vertex AI" \
+    --form "Vertex AI configuration" 10 60 2 \
+      "Project ID:" 1 1 "ea-claw" 1 15 30 0 \
+      "Region:"     2 1 "europe-west1" 2 15 30 0 \
+    2>"$tmp"
+  local project region
+  project="$(sed -n '1p' "$tmp")"
+  region="$(sed -n '2p' "$tmp")"
+  rm -f "$tmp"
+  printf '%s %s' "${project:-ea-claw}" "${region:-europe-west1}"
+}
+
+# tui_ask_obsidian_vault — prints vault path or empty
+tui_ask_obsidian_vault() {
+  local tmp; tmp="$(mktemp)"
+  dialog --backtitle "vibe-install" --title "Obsidian vault" \
+    --inputbox "Path of your Obsidian vault (leave empty to skip symlink):" 10 70 "" \
+    2>"$tmp"
+  local v; v="$(cat "$tmp")"; rm -f "$tmp"
+  printf '%s' "$v"
+}
