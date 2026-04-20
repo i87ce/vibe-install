@@ -39,6 +39,12 @@ log_fail() {
   return 1
 }
 
+log_debug() {
+  [[ "${VIBE_LOG_LEVEL:-info}" == "debug" ]] || return 0
+  _log "DEBUG" "$1" "${@:2}"
+  printf "${C_DIM}  · %s${C_RESET}\n" "${*:2}"
+}
+
 # -- Idempotency helpers -------------------------------------------------------
 
 check_installed() {

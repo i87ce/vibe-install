@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
     --only)       MODE="only"; ONLY_MODULES="$2"; shift 2 ;;
     --doctor)     MODE="doctor"; shift ;;
     --dry-run)    MODE="dry-run"; export VIBE_DRY_RUN=1; shift ;;
-    --log-level)  LOG_LEVEL="$2"; shift 2 ;;
+    --log-level)  LOG_LEVEL="$2"; export VIBE_LOG_LEVEL="$2"; shift 2 ;;
     --help|-h)    usage; exit 0 ;;
     *)            echo "Unknown option: $1" >&2; usage; exit 2 ;;
   esac
