@@ -11,6 +11,7 @@ fi
 MOD="08-containers"
 
 run_containers() {
+  local MOD="08-containers"
   local s="$VIBE_SELECTED"
   [[ " $s " == *" docker "*    ]] && brew_cask_install docker "$MOD"
   if [[ " $s " == *" terraform "* ]]; then

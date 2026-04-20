@@ -61,15 +61,22 @@ install_ruby_rbenv() {
 }
 
 install_sdkman_java() {
-  if [[ -d "$HOME/.sdkman" ]]; then
+  local init="$HOME/.sdkman/bin/sdkman-init.sh"
+  if [[ -s "$init" ]]; then
     log_info "$MOD" "sdkman: already installed"
   else
+    # If ~/.sdkman exists but init script is missing, sdkman is partially installed.
+    [[ -d "$HOME/.sdkman" ]] && log_warn "$MOD" "sdkman dir exists but init script missing — re-running installer"
     # shellcheck disable=SC2015
     curl -s "https://get.sdkman.io" | bash >>"$VIBE_LOG_FILE" 2>&1 \
       && log_ok "$MOD" "sdkman: installed"
   fi
-  # shellcheck disable=SC1091
-  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  if [[ ! -s "$init" ]]; then
+    log_fail "$MOD" "sdkman: init script still missing after install — skipping Java"
+    return 1
+  fi
+  # shellcheck disable=SC1090,SC1091
+  source "$init"
   sdk install java 21-tem >>"$VIBE_LOG_FILE" 2>&1 || true
 }
 
@@ -82,6 +89,7 @@ install_bun() {
 }
 
 run_runtimes() {
+  local MOD="07-runtimes"
   local s="$VIBE_SELECTED"
   [[ " $s " == *" rt_node "*   ]] && install_nvm_and_node
   [[ " $s " == *" rt_python "* ]] && install_uv

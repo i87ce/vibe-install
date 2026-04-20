@@ -82,6 +82,7 @@ install_rosetta() {
 }
 
 run_foundation() {
+  local MOD="01-foundation"
   install_xcode_clt || return 1
   install_homebrew || return 1
   install_rosetta  || return 1

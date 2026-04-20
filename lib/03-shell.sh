@@ -126,6 +126,7 @@ install_zshrc() {
 }
 
 run_shell() {
+  local MOD="03-shell"
   local selected="$VIBE_SELECTED"
 
   [[ " $selected " == *" ohmyzsh "* ]] && install_ohmyzsh

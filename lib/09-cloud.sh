@@ -61,6 +61,7 @@ install_pwsh() {
 }
 
 run_cloud() {
+  local MOD="09-cloud"
   local s="$VIBE_SELECTED"
   [[ " $s " == *" gcloud "*   ]] && install_gcloud
   [[ " $s " == *" azure "*    ]] && install_azure_cli

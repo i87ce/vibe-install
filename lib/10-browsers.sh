@@ -11,6 +11,7 @@ fi
 MOD="10-browsers"
 
 run_browsers() {
+  local MOD="10-browsers"
   local s="$VIBE_SELECTED"
   [[ " $s " == *" chrome "*  ]] && brew_cask_install google-chrome "$MOD"
   [[ " $s " == *" postman "* ]] && brew_cask_install postman "$MOD"

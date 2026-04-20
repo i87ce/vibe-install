@@ -100,6 +100,7 @@ enable_agent_teams() {
 }
 
 run_claude() {
+  local MOD="05-claude"
   local selected="$VIBE_SELECTED"
 
   [[ " $selected " == *" claude_cli "* ]]          && install_claude_cli

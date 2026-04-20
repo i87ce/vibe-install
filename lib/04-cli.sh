@@ -11,6 +11,7 @@ fi
 MOD="04-cli"
 
 run_cli() {
+  local MOD="04-cli"
   local selected="$VIBE_SELECTED"
 
   if [[ " $selected " == *" cli_git "* ]]; then

@@ -11,6 +11,7 @@ fi
 MOD="11-db"
 
 run_db() {
+  local MOD="11-db"
   [[ " $VIBE_SELECTED " == *" db_clients "* ]] || return 0
   brew_install postgresql@17 "$MOD"
   brew_install mysql-client  "$MOD"

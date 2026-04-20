@@ -35,6 +35,8 @@ _skip() {
 }
 
 doctor_run() {
+  # doctor_run uses _check/_skip (not log_*), so it doesn't read MOD — the
+  # top-level `MOD="99-doctor"` in this file is kept for anyone who extends it.
   printf "\n${C_CYAN}%s${C_RESET}\n" "Vibe Install — Doctor Report"
   echo "─────────────────────────────────────────────"
 

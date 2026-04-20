@@ -57,6 +57,7 @@ import_iterm2_profile() {
 }
 
 run_iterm2() {
+  local MOD="02-iterm2"
   install_iterm2_app || return 1
   install_meslo_nerd_font || return 1
   import_iterm2_profile || return 1

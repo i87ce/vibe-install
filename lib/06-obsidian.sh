@@ -11,6 +11,7 @@ fi
 MOD="06-obsidian"
 
 run_obsidian() {
+  local MOD="06-obsidian"
   [[ " $VIBE_SELECTED " == *" obsidian "* ]] || return 0
 
   brew_cask_install "obsidian" "$MOD"
