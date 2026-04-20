@@ -52,6 +52,10 @@ brew_install() {
     log_info "$module" "$formula: already installed"
     return 0
   fi
+  if [[ "${VIBE_DRY_RUN:-0}" == "1" ]]; then
+    log_info "$module" "$formula: would install (dry-run)"
+    return 0
+  fi
   log_info "$module" "$formula: installing…"
   if brew install "$formula" >>"$VIBE_LOG_FILE" 2>&1; then
     log_ok "$module" "$formula: installed"
@@ -66,6 +70,10 @@ brew_cask_install() {
   local module="${2:-core}"
   if brew list --cask "$cask" >/dev/null 2>&1; then
     log_info "$module" "$cask (cask): already installed"
+    return 0
+  fi
+  if [[ "${VIBE_DRY_RUN:-0}" == "1" ]]; then
+    log_info "$module" "$cask (cask): would install (dry-run)"
     return 0
   fi
   log_info "$module" "$cask (cask): installing…"
