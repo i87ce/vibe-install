@@ -61,6 +61,11 @@ if [[ "$MODE" != "doctor" ]]; then
 
   # Ensure `dialog` is available for the TUI (needs brew, just installed)
   brew_install "dialog" "main"
+
+  # iTerm2 is installed unconditionally alongside Foundation
+  # shellcheck source=lib/02-iterm2.sh
+  source "$SCRIPT_DIR/lib/02-iterm2.sh"
+  run_iterm2 || log_warn "main" "iTerm2 setup had failures — continuing"
 fi
 
 # -- Dispatch placeholder (filled in later tasks) ------------------------------
