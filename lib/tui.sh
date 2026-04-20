@@ -2,8 +2,11 @@
 # shellcheck shell=bash
 # shellcheck source-path=SCRIPTDIR
 # tui.sh — dialog-based checklist, sub-prompts, config save/load.
-# shellcheck source=common.sh
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+# Guard against re-sourcing common.sh (readonly color vars would conflict).
+if ! declare -F log_info >/dev/null 2>&1; then
+  # shellcheck source=common.sh
+  source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+fi
 
 # shellcheck disable=SC2034
 MOD="tui"
@@ -91,4 +94,32 @@ tui_select() {
   rm -f "$tmp"
   # Strip separator lines
   grep -v '^SEP_' <<< "$result" || true
+}
+
+tui_save_config() {
+  local out_file="$1"
+  local selected="$2"   # space-separated keys
+  local entry key
+  : > "$out_file"
+  for entry in "${VIBE_CATALOG[@]}"; do
+    IFS='|' read -r key _rest <<< "$entry"
+    [[ "$key" == SEP_* ]] && continue
+    if [[ " $selected " == *" $key "* ]]; then
+      printf '%s=true\n'  "$key" >> "$out_file"
+    else
+      printf '%s=false\n' "$key" >> "$out_file"
+    fi
+  done
+}
+
+tui_load_config() {
+  local in_file="$1"
+  local key val out=""
+  while IFS='=' read -r key val; do
+    [[ -z "$key" ]] && continue
+    if [[ "$val" == "true" ]]; then
+      out+="$key "
+    fi
+  done < "$in_file"
+  printf '%s' "${out% }"
 }
