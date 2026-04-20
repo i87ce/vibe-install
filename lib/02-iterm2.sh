@@ -37,9 +37,11 @@ import_iterm2_profile() {
     log_warn "$MOD" "Existing dynamic profile backed up to $(basename "$backup")"
   fi
 
-  # Wrap the single-profile JSON dump into iTerm2's dynamic profile envelope
+  # Wrap the single-profile JSON dump into iTerm2's dynamic profile envelope.
+  # Intentionally DO NOT set "Dynamic Profile Parent Name" — iTerm2 treats an empty
+  # string as "unknown parent" and emits a warning. Omitting the key = "no parent".
   jq -n --slurpfile prof "$SCRIPT_DIR/templates/iterm2-profile.json" \
-    '{Profiles: [ $prof[0] + {"Guid": "vibe-install-default", "Dynamic Profile Parent Name": ""} ]}' \
+    '{Profiles: [ ($prof[0] | del(."Dynamic Profile Parent Name")) + {"Guid": "vibe-install-default", "Name": "vibe-install"} ]}' \
     > "$target"
   log_ok "$MOD" "iTerm2 dynamic profile installed to ~/Library/Application Support/iTerm2/DynamicProfiles/"
 }
