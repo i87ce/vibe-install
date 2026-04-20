@@ -69,31 +69,24 @@ VIBE_CATALOG=(
 
 # Returns space-separated list of selected keys on stdout; exit 1 if cancelled.
 tui_select() {
-  local args=(--separate-output --checklist "Select components to install" 30 78 22)
-  local entry key label default
+  # --stdout: dialog writes selection to stdout (clean) instead of stderr (mixed with errors).
+  # --separate-output: one tag per line.
+  local args=(--stdout --separate-output --checklist "Select components to install" 30 78 22)
+  local entry key section label default
   for entry in "${VIBE_CATALOG[@]}"; do
-    IFS='|' read -r key _section label default <<< "$entry"
-    if [[ "$key" == SEP_* ]]; then
-      # Separator: non-selectable, just visual. dialog lacks native separators —
-      # render as an unchecked, disabled-looking row by prefixing with spaces.
-      args+=("$key" "$label" "off")
-    else
-      args+=("$key" "$label" "$default")
-    fi
+    IFS='|' read -r key section label default <<< "$entry"
+    # Skip separator rows — dialog has no real separator support; grouping is done
+    # via the [SECTION] prefix on each label instead.
+    [[ "$key" == SEP_* ]] && continue
+    args+=("$key" "[$section] $label" "$default")
   done
 
-  local tmp
-  tmp="$(mktemp)"
-  if ! dialog --backtitle "vibe-install" --title "Vibe Install — DonTouch" \
-       "${args[@]}" 2>"$tmp"; then
-    rm -f "$tmp"
+  local result
+  if ! result="$(dialog --backtitle "vibe-install" --title "Vibe Install — DonTouch" "${args[@]}")"; then
     return 1
   fi
-  local result
-  result="$(cat "$tmp")"
-  rm -f "$tmp"
-  # Strip separator lines
-  grep -v '^SEP_' <<< "$result" || true
+  # Normalize newline-separated tags → space-separated for the rest of the pipeline.
+  printf '%s' "$result" | tr '\n' ' ' | sed 's/ *$//'
 }
 
 tui_save_config() {
