@@ -63,3 +63,32 @@ VIBE_CATALOG=(
   "SEP_DB|DB|--- DATABASE TOOLS ---|off"
   "db_clients|DB|psql, mysql-client, redis-cli, sqlite|on"
 )
+
+# Returns space-separated list of selected keys on stdout; exit 1 if cancelled.
+tui_select() {
+  local args=(--separate-output --checklist "Select components to install" 30 78 22)
+  local entry key label default
+  for entry in "${VIBE_CATALOG[@]}"; do
+    IFS='|' read -r key _section label default <<< "$entry"
+    if [[ "$key" == SEP_* ]]; then
+      # Separator: non-selectable, just visual. dialog lacks native separators —
+      # render as an unchecked, disabled-looking row by prefixing with spaces.
+      args+=("$key" "$label" "off")
+    else
+      args+=("$key" "$label" "$default")
+    fi
+  done
+
+  local tmp
+  tmp="$(mktemp)"
+  if ! dialog --backtitle "vibe-install" --title "Vibe Install — DonTouch" \
+       "${args[@]}" 2>"$tmp"; then
+    rm -f "$tmp"
+    return 1
+  fi
+  local result
+  result="$(cat "$tmp")"
+  rm -f "$tmp"
+  # Strip separator lines
+  grep -v '^SEP_' <<< "$result" || true
+}
