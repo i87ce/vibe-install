@@ -57,3 +57,23 @@ teardown() {
   [[ "$status" -eq 0 ]]
   grep -q "jq: already installed" "$VIBE_LOG_FILE"
 }
+
+@test "render_template substitutes {{KEY}} placeholders" {
+  local tmp_in tmp_out
+  tmp_in="$(mktemp)"
+  tmp_out="$(mktemp)"
+  echo 'project={{VERTEX_PROJECT}} region={{VERTEX_REGION}} home={{HOME}}' > "$tmp_in"
+  render_template "$tmp_in" "$tmp_out" \
+    "VERTEX_PROJECT=ea-claw" \
+    "VERTEX_REGION=europe-west1" \
+    "HOME=/Users/alice"
+  run cat "$tmp_out"
+  [[ "$output" == "project=ea-claw region=europe-west1 home=/Users/alice" ]]
+  rm -f "$tmp_in" "$tmp_out"
+}
+
+@test "log_run_header writes delimited block" {
+  log_run_header
+  run grep -c "^===" "$VIBE_LOG_FILE"
+  [[ "$output" -ge "2" ]]
+}

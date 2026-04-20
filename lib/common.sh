@@ -70,3 +70,31 @@ brew_cask_install() {
     return 1
   fi
 }
+
+# -- Template rendering --------------------------------------------------------
+
+render_template() {
+  local in_file="$1"
+  local out_file="$2"
+  shift 2
+  local content
+  content="$(cat "$in_file")"
+  local pair key val
+  for pair in "$@"; do
+    key="${pair%%=*}"
+    val="${pair#*=}"
+    # Use bash string replacement instead of sed to avoid escaping regex chars
+    content="${content//\{\{${key}\}\}/$val}"
+  done
+  printf '%s' "$content" > "$out_file"
+}
+
+# -- Run header ----------------------------------------------------------------
+
+log_run_header() {
+  {
+    echo "==============================================================="
+    printf ' Vibe Install run — %s — user: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$USER"
+    echo "==============================================================="
+  } >> "$VIBE_LOG_FILE"
+}
