@@ -53,6 +53,16 @@ done
 log_run_header
 log_info "main" "mode=$MODE"
 
+# Foundation runs unconditionally in every mode except --doctor
+if [[ "$MODE" != "doctor" ]]; then
+  # shellcheck source=lib/01-foundation.sh
+  source "$SCRIPT_DIR/lib/01-foundation.sh"
+  run_foundation || { log_fail "main" "Foundation failed — cannot continue"; exit 1; }
+
+  # Ensure `dialog` is available for the TUI (needs brew, just installed)
+  brew_install "dialog" "main"
+fi
+
 # -- Dispatch placeholder (filled in later tasks) ------------------------------
 
 case "$MODE" in
