@@ -159,3 +159,60 @@ tui_ask_obsidian_vault() {
   local v; v="$(cat "$tmp")"; rm -f "$tmp"
   printf '%s' "$v"
 }
+
+tui_summary() {
+  local selected="$1" prompt="$2" vproject="$3" vregion="$4" vault="$5"
+  local count; count="$(wc -w <<< "$selected" | tr -d ' ')"
+  local msg
+  msg=$(cat <<EOF
+About to install:
+  • $count components selected
+  • Prompt: $prompt
+  • Vertex AI: $vproject / $vregion
+  • Obsidian vault: ${vault:-<skipped>}
+
+Estimated time: 20-30 minutes
+Estimated disk usage: ~8 GB
+
+Proceed?
+EOF
+)
+  dialog --backtitle "vibe-install" --title "Confirm" --yesno "$msg" 16 70
+}
+
+# tui_run drives the whole interactive flow; exports VIBE_* vars for the orchestrator.
+tui_run() {
+  local selected
+  selected="$(tui_select)" || return 1
+  [[ -z "$selected" ]] && { log_fail "$MOD" "No components selected"; return 1; }
+
+  local prompt vertex vault vproject vregion
+  if [[ " $selected " == *" prompt "* ]]; then
+    prompt="$(tui_prompt_engine)"
+  else
+    prompt="p10k"
+  fi
+  if [[ " $selected " == *" claude_vertex "* ]]; then
+    vertex="$(tui_ask_vertex)"
+    vproject="${vertex% *}"
+    vregion="${vertex#* }"
+  else
+    vproject="ea-claw"; vregion="europe-west1"
+  fi
+  if [[ " $selected " == *" obsidian "* ]]; then
+    vault="$(tui_ask_obsidian_vault)"
+  else
+    vault=""
+  fi
+
+  tui_summary "$selected" "$prompt" "$vproject" "$vregion" "$vault" || return 1
+
+  export VIBE_SELECTED="$selected"
+  export VIBE_PROMPT="$prompt"
+  export VIBE_VERTEX_PROJECT="$vproject"
+  export VIBE_VERTEX_REGION="$vregion"
+  export VIBE_OBSIDIAN_VAULT="$vault"
+
+  tui_save_config "$HOME/.vibe-install.conf" "$selected"
+  clear
+}
