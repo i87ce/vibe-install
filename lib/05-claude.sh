@@ -142,6 +142,33 @@ install_mempalace_mcp() {
     >>"$VIBE_LOG_FILE" 2>&1 \
     || { log_fail "$MOD" "mempalace: MCP registration failed"; return 1; }
   log_ok "$MOD" "mempalace MCP: registered ($expected)"
+
+  # Patch plugin hook scripts to use venv python instead of bare python3
+  # (bare python3 hits the same pyexpat breakage on Homebrew).
+  local hook_dir
+  hook_dir="$(find "$HOME/.claude/plugins/cache/mempalace" -name "hooks" -type d 2>/dev/null | head -1)"
+  if [[ -n "$hook_dir" ]]; then
+    local f patched=0
+    for f in "$hook_dir"/mempal-*.sh; do
+      [[ -f "$f" ]] || continue
+      if grep -q 'python3 -m mempalace' "$f" \
+         && ! grep -q 'MEMPALACE_PY' "$f"; then
+        local tmp_hook
+        tmp_hook="$(mktemp)"
+        awk -v venv="$MEMPALACE_VENV/bin/python3" '
+          /^INPUT=\$\(cat\)/ {
+            print "MEMPALACE_PY=\"" venv "\""
+            print "[[ -x \"$MEMPALACE_PY\" ]] || MEMPALACE_PY=\"python3\""
+          }
+          { gsub(/python3 -m mempalace/, "\"$MEMPALACE_PY\" -m mempalace"); print }
+        ' "$f" > "$tmp_hook"
+        mv "$tmp_hook" "$f"
+        chmod +x "$f"
+        patched=$((patched + 1))
+      fi
+    done
+    (( patched > 0 )) && log_ok "$MOD" "mempalace hooks: patched $patched scripts to use venv python"
+  fi
 }
 
 run_claude() {
