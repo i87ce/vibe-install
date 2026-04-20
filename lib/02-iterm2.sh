@@ -44,9 +44,15 @@ import_iterm2_profile() {
   # Wrap the single-profile JSON dump into iTerm2's dynamic profile envelope.
   # Intentionally DO NOT set "Dynamic Profile Parent Name" — iTerm2 treats an empty
   # string as "unknown parent" and emits a warning. Omitting the key = "no parent".
+  # Write to a temp file outside DynamicProfiles/ then atomically rename into place,
+  # so iTerm2 (which watches the folder via FSEvents) never sees a truncated file.
+  mkdir -p "$HOME/.vibe-install"
+  local tmp
+  tmp="$(mktemp "$HOME/.vibe-install/iterm2-profile.XXXXXX.json")"
   jq -n --slurpfile prof "$SCRIPT_DIR/templates/iterm2-profile.json" \
     '{Profiles: [ ($prof[0] | del(."Dynamic Profile Parent Name")) + {"Guid": "vibe-install-default", "Name": "vibe-install"} ]}' \
-    > "$target"
+    > "$tmp"
+  mv -f "$tmp" "$target"
   log_ok "$MOD" "iTerm2 dynamic profile installed to ~/Library/Application Support/iTerm2/DynamicProfiles/"
 }
 
