@@ -2,9 +2,12 @@
 # 02-iterm2.sh — installs iTerm2, Nerd font, and imports shared profile.
 # shellcheck shell=bash
 # shellcheck source-path=SCRIPTDIR
-# shellcheck source=common.sh
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+if ! declare -F log_info >/dev/null 2>&1; then
+  # shellcheck source=common.sh
+  source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+fi
 
+# shellcheck disable=SC2034
 MOD="02-iterm2"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

@@ -2,9 +2,12 @@
 # 01-foundation.sh — installs Xcode CLT, Homebrew, Rosetta 2 (Apple Silicon).
 # shellcheck shell=bash
 # shellcheck source-path=SCRIPTDIR
-# shellcheck source=common.sh
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+if ! declare -F log_info >/dev/null 2>&1; then
+  # shellcheck source=common.sh
+  source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+fi
 
+# shellcheck disable=SC2034
 MOD="01-foundation"
 
 install_xcode_clt() {
