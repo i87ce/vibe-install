@@ -31,10 +31,14 @@ import_iterm2_profile() {
   local target="$prefs_root/vibe-install.json"
 
   if [[ -f "$target" ]]; then
+    local backup_dir="$HOME/.vibe-install/backups"
+    mkdir -p "$backup_dir"
     # shellcheck disable=SC2155
-    local backup="$target.bak.$(date +%Y%m%d%H%M%S)"
-    cp "$target" "$backup"
-    log_warn "$MOD" "Existing dynamic profile backed up to $(basename "$backup")"
+    local backup="$backup_dir/iterm2-dynamic-profile.$(date +%Y%m%d%H%M%S).json"
+    # mv (not cp) so no stray *.bak file remains inside DynamicProfiles/ — iTerm2
+    # scans every file there and would complain about duplicate GUIDs.
+    mv "$target" "$backup"
+    log_warn "$MOD" "Existing dynamic profile moved to $backup"
   fi
 
   # Wrap the single-profile JSON dump into iTerm2's dynamic profile envelope.
