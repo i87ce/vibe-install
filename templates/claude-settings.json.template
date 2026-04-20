@@ -22,6 +22,7 @@
     "frontend-design@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
@@ -30,12 +31,19 @@
     "sentry@claude-plugins-official": true,
     "cloudflare@claude-plugins-official": true,
     "mempalace@mempalace": true,
-    "fullstack-dev-skills@fullstack-dev-skills": true
+    "fullstack-dev-skills@fullstack-dev-skills": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "kicad-happy@kicad-happy": true,
+    "media-pipeline@media-pipeline-marketplace": true
   },
   "extraKnownMarketplaces": {
-    "claude-plugins-official": { "source": { "source": "github", "repo": "anthropics/claude-plugins-official" } },
-    "mempalace":               { "source": { "source": "github", "repo": "milla-jovovich/mempalace" } },
-    "fullstack-dev-skills":    { "source": { "source": "github", "repo": "jeffallan/claude-skills" } }
+    "claude-plugins-official":    { "source": { "source": "github", "repo": "anthropics/claude-plugins-official" } },
+    "mempalace":                  { "source": { "source": "github", "repo": "milla-jovovich/mempalace" } },
+    "fullstack-dev-skills":       { "source": { "source": "github", "repo": "jeffallan/claude-skills" } },
+    "ui-ux-pro-max-skill":        { "source": { "source": "github", "repo": "nextlevelbuilder/ui-ux-pro-max-skill" } },
+    "kicad-happy":                { "source": { "source": "github", "repo": "aklofas/kicad-happy" } },
+    "media-pipeline-marketplace": { "source": { "source": "github", "repo": "guinacio/claude-image-gen" } },
+    "thedotmack":                 { "source": { "source": "github", "repo": "thedotmack/claude-mem" } }
   },
   "skipDangerousModePermissionPrompt": true,
   "statusLine": {

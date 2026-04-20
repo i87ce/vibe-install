@@ -30,8 +30,8 @@ VIBE_CATALOG=(
   "claude_cli|CLAUDE|Claude Code CLI|on"
   "claude_vertex|CLAUDE|Vertex AI login (project: ea-claw)|on"
   "claude_settings|CLAUDE|settings.json template|on"
-  "claude_marketplaces|CLAUDE|Marketplaces (3)|on"
-  "claude_plugins|CLAUDE|Plugins (14)|on"
+  "claude_marketplaces|CLAUDE|Marketplaces (7)|on"
+  "claude_plugins|CLAUDE|Plugins (18)|on"
   "claude_statusline|CLAUDE|Statusline|on"
   "claude_teams|CLAUDE|Agent Teams (tmux teammateMode)|on"
 
