@@ -1,0 +1,4 @@
+# Personal overrides. Not touched by vibe-install re-runs.
+# Example:
+#   [ -f ~/.dt-secrets ] && source ~/.dt-secrets
+#   alias deploytest='cd ~/Documents/sourceCode/nlb-haproxy && ansible-playbook ...'
