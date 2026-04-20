@@ -117,39 +117,47 @@ tui_load_config() {
   printf '%s' "${out% }"
 }
 
+# All sub-prompts use --stdout so the selection lands on stdout (clean) and any
+# rendering/error noise goes to stderr (discarded via 2>/dev/null). If dialog
+# exits non-zero (Esc/Cancel), each function falls back to a sensible default.
+
 # tui_prompt_engine — radiolist between p10k and starship. Prints key.
 tui_prompt_engine() {
-  local tmp; tmp="$(mktemp)"
-  dialog --backtitle "vibe-install" --title "Prompt engine" \
-    --radiolist "Choose your zsh prompt:" 12 60 2 \
-    p10k "Powerlevel10k (preconfigured)" on \
-    starship "Starship" off 2>"$tmp"
-  local choice; choice="$(cat "$tmp")"; rm -f "$tmp"
+  local choice
+  if ! choice="$(dialog --stdout --backtitle "vibe-install" --title "Prompt engine" \
+      --radiolist "Choose your zsh prompt:" 12 60 2 \
+      p10k "Powerlevel10k (preconfigured)" on \
+      starship "Starship" off 2>/dev/null)"; then
+    choice=""
+  fi
   printf '%s' "${choice:-p10k}"
 }
 
 # tui_ask_vertex — prints "PROJECT REGION"
 tui_ask_vertex() {
-  local tmp; tmp="$(mktemp)"
-  dialog --backtitle "vibe-install" --title "Vertex AI" \
-    --form "Vertex AI configuration" 10 60 2 \
-      "Project ID:" 1 1 "ea-claw" 1 15 30 0 \
-      "Region:"     2 1 "europe-west1" 2 15 30 0 \
-    2>"$tmp"
+  local raw
+  if ! raw="$(dialog --stdout --backtitle "vibe-install" --title "Vertex AI" \
+      --form "Vertex AI configuration" 10 60 2 \
+        "Project ID:" 1 1 "ea-claw" 1 15 30 0 \
+        "Region:"     2 1 "europe-west1" 2 15 30 0 \
+      2>/dev/null)"; then
+    raw=""
+  fi
+  # --form returns values newline-separated, one per field, in field order.
   local project region
-  project="$(sed -n '1p' "$tmp")"
-  region="$(sed -n '2p' "$tmp")"
-  rm -f "$tmp"
+  project="$(printf '%s\n' "$raw" | sed -n '1p')"
+  region="$(printf '%s\n' "$raw" | sed -n '2p')"
   printf '%s %s' "${project:-ea-claw}" "${region:-europe-west1}"
 }
 
 # tui_ask_obsidian_vault — prints vault path or empty
 tui_ask_obsidian_vault() {
-  local tmp; tmp="$(mktemp)"
-  dialog --backtitle "vibe-install" --title "Obsidian vault" \
-    --inputbox "Path of your Obsidian vault (leave empty to skip symlink):" 10 70 "" \
-    2>"$tmp"
-  local v; v="$(cat "$tmp")"; rm -f "$tmp"
+  local v
+  if ! v="$(dialog --stdout --backtitle "vibe-install" --title "Obsidian vault" \
+      --inputbox "Path of your Obsidian vault (leave empty to skip symlink):" 10 70 "" \
+      2>/dev/null)"; then
+    v=""
+  fi
   printf '%s' "$v"
 }
 
