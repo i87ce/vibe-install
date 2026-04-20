@@ -102,5 +102,34 @@ esac
 log_info "main" "Selected: $VIBE_SELECTED"
 log_info "main" "Prompt=$VIBE_PROMPT vertex=$VIBE_VERTEX_PROJECT/$VIBE_VERTEX_REGION vault=${VIBE_OBSIDIAN_VAULT:-none}"
 
-# Module dispatch (populated in subsequent phases)
-echo "(module execution not yet implemented)"
+# Source and dispatch modules in order
+# shellcheck source=lib/03-shell.sh
+source "$SCRIPT_DIR/lib/03-shell.sh"
+# shellcheck source=lib/04-cli.sh
+source "$SCRIPT_DIR/lib/04-cli.sh"
+# shellcheck source=lib/05-claude.sh
+source "$SCRIPT_DIR/lib/05-claude.sh"
+# shellcheck source=lib/06-obsidian.sh
+source "$SCRIPT_DIR/lib/06-obsidian.sh"
+# shellcheck source=lib/07-runtimes.sh
+source "$SCRIPT_DIR/lib/07-runtimes.sh"
+# shellcheck source=lib/08-containers.sh
+source "$SCRIPT_DIR/lib/08-containers.sh"
+# shellcheck source=lib/09-cloud.sh
+source "$SCRIPT_DIR/lib/09-cloud.sh"
+# shellcheck source=lib/10-browsers.sh
+source "$SCRIPT_DIR/lib/10-browsers.sh"
+# shellcheck source=lib/11-db.sh
+source "$SCRIPT_DIR/lib/11-db.sh"
+
+# Order matters: runtimes before claude (claude CLI needs node),
+# cloud before claude vertex login (needs gcloud).
+run_shell      || log_warn "main" "shell module had failures"
+run_cli        || log_warn "main" "cli module had failures"
+run_runtimes   || log_warn "main" "runtimes module had failures"
+run_cloud      || log_warn "main" "cloud module had failures"
+run_claude     || log_warn "main" "claude module had failures"
+run_obsidian   || log_warn "main" "obsidian module had failures"
+run_containers || log_warn "main" "containers module had failures"
+run_browsers   || log_warn "main" "browsers module had failures"
+run_db         || log_warn "main" "db module had failures"
