@@ -7,12 +7,18 @@ set -u
 # shellcheck disable=SC2034
 VIBE_LOG_FILE="${VIBE_LOG_FILE:-$HOME/vibe-install.log}"
 
-# ANSI colors for screen output
+# ANSI colors for screen output (used by this file and consumed by downstream modules)
+# shellcheck disable=SC2034
 readonly C_RESET='\033[0m'
+# shellcheck disable=SC2034
 readonly C_DIM='\033[2m'
+# shellcheck disable=SC2034
 readonly C_GREEN='\033[32m'
+# shellcheck disable=SC2034
 readonly C_YELLOW='\033[33m'
+# shellcheck disable=SC2034
 readonly C_RED='\033[31m'
+# shellcheck disable=SC2034
 readonly C_CYAN='\033[36m'
 
 _log() {
