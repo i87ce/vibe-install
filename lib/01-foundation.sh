@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # 01-foundation.sh — installs Xcode CLT, Homebrew, Rosetta 2 (Apple Silicon).
+# shellcheck shell=bash
+# shellcheck source-path=SCRIPTDIR
 # shellcheck source=common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 

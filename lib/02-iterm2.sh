@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # 02-iterm2.sh — installs iTerm2, Nerd font, and imports shared profile.
+# shellcheck shell=bash
+# shellcheck source-path=SCRIPTDIR
 # shellcheck source=common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
