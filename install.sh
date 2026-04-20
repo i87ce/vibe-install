@@ -74,9 +74,6 @@ fi
 source "$SCRIPT_DIR/lib/tui.sh"
 
 case "$MODE" in
-  doctor)
-    echo "(doctor runs after module block — call doctor_run)"; exit 0
-    ;;
   config)
     VIBE_SELECTED="$(tui_load_config "$CONFIG_FILE")"
     # Non-interactive: use defaults for sub-prompts unless env vars already set
@@ -121,6 +118,13 @@ source "$SCRIPT_DIR/lib/09-cloud.sh"
 source "$SCRIPT_DIR/lib/10-browsers.sh"
 # shellcheck source=lib/11-db.sh
 source "$SCRIPT_DIR/lib/11-db.sh"
+# shellcheck source=lib/99-doctor.sh
+source "$SCRIPT_DIR/lib/99-doctor.sh"
+
+if [[ "$MODE" == "doctor" ]]; then
+  doctor_run
+  exit $?
+fi
 
 # Order matters: runtimes before claude (claude CLI needs node),
 # cloud before claude vertex login (needs gcloud).
@@ -133,3 +137,6 @@ run_obsidian   || log_warn "main" "obsidian module had failures"
 run_containers || log_warn "main" "containers module had failures"
 run_browsers   || log_warn "main" "browsers module had failures"
 run_db         || log_warn "main" "db module had failures"
+
+# Final doctor run at end of every install
+doctor_run || log_warn "main" "Doctor found missing items — see report above"
