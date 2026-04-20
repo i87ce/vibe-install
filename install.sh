@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/lib/common.sh"
 
+VIBE_RUN_START="$(date +%s)"
+# shellcheck disable=SC2034  # used in summary footer
+
 # -- Defaults ------------------------------------------------------------------
 
 MODE="interactive"           # interactive | config | only | doctor | dry-run
@@ -49,6 +52,21 @@ done
 
 # Mark vars as read so shellcheck sees them used (real consumers land in Phases 4 and 9).
 : "$CONFIG_FILE" "$ONLY_MODULES" "$LOG_LEVEL"
+
+# Recovery: detect interrupted previous run
+if [[ "$MODE" == "interactive" && -f "$HOME/.vibe-install.conf" && -f "$VIBE_LOG_FILE" ]]; then
+  last_mod="$(grep -oE '\[(0[0-9]|99)-[a-z]+\]' "$VIBE_LOG_FILE" | tail -n1 || true)"
+  if [[ -n "$last_mod" ]] && ! tail -n 20 "$VIBE_LOG_FILE" | grep -q 'Run summary'; then
+    echo
+    echo "Previous run appears interrupted at $last_mod."
+    read -r -p "Resume with saved config? [Y/t=restart TUI/n=abort]: " choice
+    case "${choice:-Y}" in
+      [Yy]*) MODE="config"; CONFIG_FILE="$HOME/.vibe-install.conf" ;;
+      [Tt]*) MODE="interactive" ;;
+      *)     exit 0 ;;
+    esac
+  fi
+fi
 
 log_run_header
 log_info "main" "mode=$MODE"
@@ -140,3 +158,10 @@ run_db         || log_warn "main" "db module had failures"
 
 # Final doctor run at end of every install
 doctor_run || log_warn "main" "Doctor found missing items — see report above"
+
+{
+  echo "==============================================================="
+  echo " Run summary"
+  echo "==============================================================="
+  printf ' Duration: %ds\n' "$(( $(date +%s) - VIBE_RUN_START ))"
+} >> "$VIBE_LOG_FILE"
