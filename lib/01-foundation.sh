@@ -59,3 +59,25 @@ install_homebrew() {
 
   log_ok "$MOD" "Homebrew: installed ($(brew --version | head -n1))"
 }
+
+install_rosetta() {
+  if [[ "$(uname -m)" != "arm64" ]]; then
+    log_info "$MOD" "Rosetta 2: skipped (Intel Mac)"
+    return 0
+  fi
+  if /usr/bin/pgrep -q oahd; then
+    log_info "$MOD" "Rosetta 2: already installed"
+    return 0
+  fi
+  log_info "$MOD" "Rosetta 2: installing…"
+  # shellcheck disable=SC2015
+  softwareupdate --install-rosetta --agree-to-license >>"$VIBE_LOG_FILE" 2>&1 \
+    && log_ok "$MOD" "Rosetta 2: installed" \
+    || { log_fail "$MOD" "Rosetta 2: install failed"; return 1; }
+}
+
+run_foundation() {
+  install_xcode_clt || return 1
+  install_homebrew || return 1
+  install_rosetta  || return 1
+}
