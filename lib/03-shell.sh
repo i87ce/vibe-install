@@ -87,3 +87,51 @@ configure_prompt() {
     *) log_warn "$MOD" "Unknown prompt choice: $choice" ;;
   esac
 }
+
+install_zshrc() {
+  local vproject="${VIBE_VERTEX_PROJECT:-ea-claw}"
+  local vregion="${VIBE_VERTEX_REGION:-europe-west1}"
+
+  # Backup existing .zshrc if present
+  if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
+    local bak
+    bak="$HOME/.zshrc.bak.$(date +%Y%m%d%H%M%S)"
+    cp "$HOME/.zshrc" "$bak"
+    log_warn "$MOD" "Existing ~/.zshrc backed up to $(basename "$bak")"
+  fi
+
+  cp "$SCRIPT_DIR/templates/zshrc.template" "$HOME/.zshrc"
+
+  mkdir -p "$HOME/.config/vibe"
+  cp "$SCRIPT_DIR/templates/zshrc.d/10-path.zsh"   "$HOME/.config/vibe/10-path.zsh"
+  render_template \
+    "$SCRIPT_DIR/templates/zshrc.d/20-tools.zsh" \
+    "$HOME/.config/vibe/20-tools.zsh" \
+    "VERTEX_PROJECT=$vproject" \
+    "VERTEX_REGION=$vregion"
+  cp "$SCRIPT_DIR/templates/zshrc.d/30-aliases.zsh" "$HOME/.config/vibe/30-aliases.zsh"
+
+  # Write .zshrc.local only if missing (never overwrite)
+  if [[ ! -f "$HOME/.zshrc.local" ]]; then
+    cp "$SCRIPT_DIR/templates/zshrc.local.template" "$HOME/.zshrc.local"
+    # shellcheck disable=SC2088
+    log_ok "$MOD" "~/.zshrc.local: written (empty template)"
+  else
+    # shellcheck disable=SC2088
+    log_info "$MOD" "~/.zshrc.local: preserved"
+  fi
+
+  # shellcheck disable=SC2088
+  log_ok "$MOD" "zshrc + ~/.config/vibe/*.zsh: installed"
+}
+
+run_shell() {
+  local selected="$VIBE_SELECTED"
+
+  [[ " $selected " == *" ohmyzsh "* ]] && install_ohmyzsh
+  [[ " $selected " == *" tmux "* ]]    && install_tmux
+  [[ " $selected " == *" prompt "* ]]  && configure_prompt "${VIBE_PROMPT:-p10k}"
+  [[ " $selected " == *" zshrc "* ]]   && install_zshrc
+
+  return 0
+}
