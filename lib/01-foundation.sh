@@ -35,3 +35,27 @@ install_xcode_clt() {
     return 1
   fi
 }
+
+install_homebrew() {
+  if check_installed brew; then
+    log_info "$MOD" "Homebrew: already installed ($(brew --version | head -n1))"
+    return 0
+  fi
+  log_info "$MOD" "Homebrew: installing via official script…"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+    >>"$VIBE_LOG_FILE" 2>&1 || { log_fail "$MOD" "Homebrew install failed"; return 1; }
+
+  # Post-install shell environment (Apple Silicon vs Intel)
+  local brew_shellenv
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    brew_shellenv="/opt/homebrew/bin/brew shellenv"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    brew_shellenv="/usr/local/bin/brew shellenv"
+  else
+    log_fail "$MOD" "Homebrew installed but binary not found in expected paths"
+    return 1
+  fi
+  eval "$($brew_shellenv)"
+
+  log_ok "$MOD" "Homebrew: installed ($(brew --version | head -n1))"
+}
